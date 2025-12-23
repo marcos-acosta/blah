@@ -108,7 +108,7 @@ export default function Explore(props: Props) {
 					{currentUpdate ? (
 						<>
 							<Text color="gray">
-								{formatDate(new Date(currentUpdate?.timestamp), true)}
+								{formatDate(new Date(currentUpdate?.timestamp), 'full')}
 							</Text>
 							<Text>{currentUpdate?.message}</Text>
 						</>
@@ -129,7 +129,7 @@ export default function Explore(props: Props) {
 								<Box key={update.timestamp} flexDirection="row">
 									<Box width={35} height={1} flexShrink={0}>
 										<Text color={color}>
-											{formatDate(new Date(update.timestamp), true)}
+											{formatDate(new Date(update.timestamp), 'hour')}
 										</Text>
 									</Box>
 									<Box height={1} overflowX="hidden" overflowY="hidden">

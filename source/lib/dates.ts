@@ -47,7 +47,10 @@ export const getWeek = (date: Date): string => {
 	return formatDateIso(monday);
 };
 
-export const formatDate = (date: Date, includeTime = false): string => {
+export const formatDate = (
+	date: Date,
+	includeTime: false | 'hour' | 'full' = false,
+): string => {
 	const dayOfWeek = DAYS_OF_WEEK[date.getDay()];
 	const month = MONTHS[date.getMonth()];
 	const day = date.getDate();
@@ -59,7 +62,13 @@ export const formatDate = (date: Date, includeTime = false): string => {
 		const hour = date.getHours();
 		const hour12 = hour % 12 || 12;
 		const ampm = hour < 12 ? 'am' : 'pm';
-		result += ` @${hour12}${ampm}`;
+
+		if (includeTime === 'hour') {
+			result += ` @${hour12}${ampm}`;
+		} else if (includeTime === 'full') {
+			const minutes = String(date.getMinutes()).padStart(2, '0');
+			result += ` @${hour12}:${minutes}${ampm}`;
+		}
 	}
 
 	return result;
