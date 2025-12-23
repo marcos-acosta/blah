@@ -41,12 +41,81 @@ export default function Explore(props: Props) {
 		}
 	};
 
+	// Find nearest log to a target date
+	const findNearestLog = (targetDate: Date) => {
+		if (!props.materializedLogs || !props.materializedLogs.length) {
+			return;
+		}
+
+		const targetTime = targetDate.getTime();
+		const MS_PER_DAY = 24 * 60 * 60 * 1000;
+		let nearestIndex = 0;
+		let minDiff = Math.abs(
+			new Date((props.materializedLogs[0] as Update).timestamp).getTime() -
+				targetTime,
+		);
+
+		for (let i = 1; i < props.materializedLogs.length; i++) {
+			const logTime = new Date(
+				(props.materializedLogs[i] as Update).timestamp,
+			).getTime();
+			const diff = Math.abs(logTime - targetTime);
+			const diffInDays = Math.floor(diff / MS_PER_DAY);
+
+			// Early exit if we found a log on the same day
+			if (diffInDays === 0) {
+				setCurrentIndex(i);
+				return;
+			}
+
+			if (diff < minDiff) {
+				minDiff = diff;
+				nearestIndex = i;
+			}
+		}
+
+		setCurrentIndex(nearestIndex);
+	};
+
+	// Jump by time period
+	const jumpByDays = (days: number) => {
+		if (days === 0) {
+			return;
+		}
+
+		if (currentIndex === undefined || !props.materializedLogs) {
+			return;
+		}
+
+		const currentLog = props.materializedLogs[currentIndex];
+		if (currentLog) {
+			const currentDate = new Date(currentLog.timestamp);
+			const targetDate = new Date(
+				currentDate.getTime() + days * 24 * 60 * 60 * 1000,
+			);
+
+			findNearestLog(targetDate);
+		}
+	};
+
 	useInput(
 		withQuit(exit, (input, key) => {
 			if (key.upArrow || input === 'k') {
 				previousIndex();
 			} else if (key.downArrow || input === 'j') {
 				nextIndex();
+			} else if (input === 'w') {
+				jumpByDays(7);
+			} else if (input === 'W') {
+				jumpByDays(-7);
+			} else if (input === 'm') {
+				jumpByDays(30);
+			} else if (input === 'M') {
+				jumpByDays(-30);
+			} else if (input === 'y') {
+				jumpByDays(365);
+			} else if (input === 'Y') {
+				jumpByDays(-365);
 			}
 			if (!showDetail) {
 				if (key.escape || input === 'b') {
