@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {Box, Text, useInput} from 'ink';
+import {Box, Text, useApp, useInput} from 'ink';
 import {Update} from '../lib/interface.js';
 import {formatDate} from '../lib/dates.js';
+import {withBreaks} from '../lib/input.js';
 
 export type Props = {
 	materializeLogs: () => Promise<void>;
@@ -15,6 +16,7 @@ export default function Explore(props: Props) {
 	const [currentIndex, setCurrentIndex] = useState<number | undefined>(
 		undefined,
 	);
+	const {exit} = useApp();
 
 	const nextIndex = () => {
 		if (
@@ -36,15 +38,15 @@ export default function Explore(props: Props) {
 		}
 	};
 
-	useInput((input, key) => {
-		if (key.escape) {
-			props.goHome();
-		} else if (key.upArrow || input === 'k') {
-			previousIndex();
-		} else if (key.downArrow || input === 'j') {
-			nextIndex();
-		}
-	});
+	useInput(
+		withBreaks(exit, props.goHome, (input, key) => {
+			if (key.upArrow || input === 'k') {
+				previousIndex();
+			} else if (key.downArrow || input === 'j') {
+				nextIndex();
+			}
+		}),
+	);
 
 	useEffect(() => {
 		if (props.materializedLogs === null) {

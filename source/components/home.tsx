@@ -1,6 +1,7 @@
 import React from 'react';
 import {Box, Text, useApp, useInput} from 'ink';
 import {getDayOfWeek} from '../lib/dates.js';
+import {withBreaks} from '../lib/input.js';
 
 export type Props = {
 	onSearch: () => void;
@@ -11,17 +12,19 @@ export type Props = {
 export default function Home(props: Props) {
 	const {exit} = useApp();
 
-	useInput(input => {
-		if (input === 'a') {
-			props.onLog();
-		} else if (input === 's') {
-			props.onSearch();
-		} else if (input === 'e') {
-			props.onExplore();
-		} else if (input === 'q') {
-			exit();
-		}
-	});
+	useInput(
+		withBreaks(exit, exit, input => {
+			if (input === 'a') {
+				props.onLog();
+			} else if (input === 's') {
+				props.onSearch();
+			} else if (input === 'e') {
+				props.onExplore();
+			} else if (input === 'q') {
+				exit();
+			}
+		}),
+	);
 
 	return (
 		<Box flexDirection="column">
