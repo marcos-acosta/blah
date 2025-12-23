@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Box, Text, useApp, useInput} from 'ink';
+import {Box, Text, Transform, useApp, useInput} from 'ink';
 import {Update} from '../lib/interface.js';
 import {formatDate} from '../lib/dates.js';
 import {withQuit} from '../lib/input.js';
@@ -179,7 +179,9 @@ export default function Explore(props: Props) {
 							<Text color="gray">
 								{formatDate(new Date(currentUpdate?.timestamp), 'full')}
 							</Text>
-							<Text>{currentUpdate?.message}</Text>
+							<Transform transform={(line, _) => line.trim()}>
+								<Text>{currentUpdate?.message}</Text>
+							</Transform>
 						</>
 					) : (
 						<Text color="red">Error loading current log.</Text>

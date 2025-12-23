@@ -18,16 +18,21 @@ export default function SetConfig(props: Props) {
 	};
 
 	return (
-		<Box>
-			<Box marginRight={1}>
-				<Text>1. Where should your logs be stored?</Text>
+		<Box flexDirection="column">
+			<Box marginBottom={1}>
+				<Text>Setup blah!</Text>
 			</Box>
-			<TextInput
-				value={logPath}
-				onChange={setLogPath}
-				placeholder="~/blah"
-				onSubmit={complete}
-			/>
+			<Box flexDirection="row">
+				<Box marginRight={1}>
+					<Text color="gray">Where should your logs be stored?</Text>
+				</Box>
+				<TextInput
+					value={logPath}
+					onChange={setLogPath}
+					placeholder="~/blah"
+					onSubmit={complete}
+				/>
+			</Box>
 		</Box>
 	);
 }
