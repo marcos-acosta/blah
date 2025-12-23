@@ -1,5 +1,6 @@
 import React from 'react';
 import {Box, Text, useApp, useInput} from 'ink';
+import {getDayOfWeek} from '../lib/dates.js';
 
 export type Props = {
 	onSearch: () => void;
@@ -23,14 +24,9 @@ export default function Home(props: Props) {
 	});
 
 	return (
-		<Box
-			flexDirection="column"
-			borderStyle="single"
-			padding={1}
-			paddingLeft={2}
-		>
+		<Box flexDirection="column">
 			<Box marginBottom={1}>
-				<Text color="yellow">blah</Text>
+				<Text color="white">Happy {getDayOfWeek()}!</Text>
 			</Box>
 			<Box flexDirection="column">
 				<Text color="gray">

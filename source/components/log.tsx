@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {BlahConfig} from '../lib/interface.js';
 import {appendLog} from '../lib/filesystem.js';
-import {Box} from 'ink';
 import TextInput from './text-input.js';
 
 export type Props = {
@@ -21,14 +20,12 @@ export default function Log(props: Props) {
 	};
 
 	return (
-		<Box padding={1} paddingLeft={2} borderStyle="single">
-			<TextInput
-				value={log}
-				onChange={setLog}
-				placeholder="What's up?"
-				onSubmit={handleSubmit}
-				onEscape={props.goHome}
-			/>
-		</Box>
+		<TextInput
+			value={log}
+			onChange={setLog}
+			placeholder="What's up?"
+			onSubmit={handleSubmit}
+			onEscape={props.goHome}
+		/>
 	);
 }
