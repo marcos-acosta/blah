@@ -57,6 +57,7 @@ export default function App() {
 		<TitledBox
 			padding={1}
 			paddingLeft={2}
+			paddingRight={2}
 			borderStyle="single"
 			titles={['blah']}
 			titleJustify="center"
