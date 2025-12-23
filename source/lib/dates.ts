@@ -25,25 +25,26 @@ const MONTHS = [
 
 export const getDayOfWeek = () => DAYS_OF_WEEK[new Date().getDay()];
 
+const formatDateIso = (date: Date) => {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
+
 export const getLocalDate = () => {
-	const now = new Date();
-	return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+	return formatDateIso(new Date());
 };
 
 export const getWeek = (date: Date): string => {
 	// Get the day of the week (0 = Sunday, 6 = Saturday)
 	const dayOfWeek = date.getDay();
 
-	// Calculate the Sunday of this week
-	const sunday = new Date(date);
-	sunday.setDate(date.getDate() - dayOfWeek);
+	// Calculate the Monday of this week
+	const monday = new Date(date);
+	monday.setDate(date.getDate() - dayOfWeek + 1);
 
-	// Format as YYYY-MM-DD
-	const year = sunday.getFullYear();
-	const month = String(sunday.getMonth() + 1).padStart(2, '0');
-	const day = String(sunday.getDate()).padStart(2, '0');
-
-	return `${year}-${month}-${day}`;
+	return formatDateIso(monday);
 };
 
 export const formatDate = (date: Date, includeTime = false): string => {
