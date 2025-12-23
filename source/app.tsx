@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {getConfig} from './lib/filesystem.js';
-import {BlahConfig} from './lib/interface.js';
+import {getConfig, loadAllLogs} from './lib/filesystem.js';
+import {BlahConfig, Update} from './lib/interface.js';
 import Home from './components/home.js';
 import SetConfig from './components/set-config.js';
 import Log from './components/log.js';
 import {TitledBox} from '@mishieck/ink-titled-box';
-import {getLocalDate} from './lib/dates.js';
+import Explore from './components/explore.js';
 
 enum Page {
 	PENDING = 0,
@@ -18,7 +18,29 @@ enum Page {
 
 export default function App() {
 	const [page, setPage] = useState(Page.PENDING);
-	const [config, setConfig] = useState<BlahConfig | null>(null);
+	const [config, setConfig] = useState<BlahConfig | undefined>(undefined);
+	const [materializedLogs, setMaterializedLogs] = useState<Update[] | null>(
+		null,
+	);
+
+	const goHome = async () => {
+		setPage(Page.HOME);
+	};
+
+	const goLog = async () => {
+		setPage(Page.ADD_LOG);
+	};
+
+	const materializeLogs = async () => {
+		if (!config) {
+			return;
+		}
+		setMaterializedLogs(await loadAllLogs(config));
+	};
+
+	const goExplore = async () => {
+		setPage(Page.EXPLORE);
+	};
 
 	useEffect(() => {
 		const config = getConfig();
@@ -26,33 +48,34 @@ export default function App() {
 			setPage(Page.SET_CONFIG);
 		} else {
 			setConfig(config);
-			setPage(Page.HOME);
+			goHome();
 		}
 	}, []);
-
-	const date = getLocalDate();
 
 	return (
 		<TitledBox
 			padding={1}
 			paddingLeft={2}
 			borderStyle="single"
-			titles={['blah', date]}
+			titles={['blah']}
 			titleJustify="center"
 			borderColor={'yellow'}
 		>
 			{page === Page.HOME ? (
 				<Home
-					onLog={async () => setPage(Page.ADD_LOG)}
+					onLog={goLog}
 					onSearch={async () => setPage(Page.SEARCH)}
-					onExplore={async () => setPage(Page.EXPLORE)}
+					onExplore={goExplore}
 				/>
 			) : page === Page.SET_CONFIG ? (
-				<SetConfig onComplete={async () => setPage(Page.HOME)} />
+				<SetConfig onComplete={goHome} />
 			) : page === Page.ADD_LOG ? (
-				<Log
-					config={config || undefined}
-					goHome={async () => setPage(Page.HOME)}
+				<Log config={config} goHome={goHome} />
+			) : page === Page.EXPLORE ? (
+				<Explore
+					materializeLogs={materializeLogs}
+					materializedLogs={materializedLogs}
+					goHome={goHome}
 				/>
 			) : (
 				<></>

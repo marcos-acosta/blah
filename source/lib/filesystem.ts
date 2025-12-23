@@ -1,8 +1,10 @@
 import TOML from '@iarna/toml';
 import * as fs from 'fs';
+import {promises as fsPromises} from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import {BlahConfig, Update} from './interface.js';
+import {getLocalDate, getWeek} from './dates.js';
 
 const CONFIG_FILE = path.join(os.homedir(), '.blah.toml');
 const LOG_FILENAME = 'logs.ndjson';
@@ -38,8 +40,18 @@ export const appendLog = (config: BlahConfig, message: string) => {
 	const update: Update = {
 		message: message,
 		timestamp: now.toISOString(),
-		date: now.toISOString().split('T')[0] as string,
+		date: getLocalDate(),
+		week: getWeek(now),
 		tags: [],
 	};
 	fs.appendFileSync(fullLogPath, JSON.stringify(update), 'utf-8');
+};
+
+export const loadAllLogs = async (config: BlahConfig) => {
+	const fullLogPath = path.join(config.logPath, LOG_FILENAME);
+	const data = await fsPromises.readFile(fullLogPath, 'utf-8');
+	return data
+		.trim()
+		.split('\n')
+		.map(line => JSON.parse(line) as Update);
 };
