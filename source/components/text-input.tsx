@@ -56,6 +56,12 @@ export type Props = {
 	 * Function to call when `Enter` is pressed, where first argument is a value of the input.
 	 */
 	readonly onSubmit?: (value: string) => void;
+
+	/**
+	 *
+	 * Function to call when `Escape` is pressed.
+	 */
+	readonly onEscape?: () => void;
 };
 
 function TextInput({
@@ -67,6 +73,7 @@ function TextInput({
 	showCursor = true,
 	onChange,
 	onSubmit,
+	onEscape,
 }: Props) {
 	const [state, setState] = useState({
 		cursorOffset: (originalValue || '').length,
@@ -135,6 +142,12 @@ function TextInput({
 				(key.shift && key.tab)
 			) {
 				return;
+			}
+
+			if (key.escape) {
+				if (onEscape) {
+					onEscape();
+				}
 			}
 
 			if (key.return) {

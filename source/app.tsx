@@ -1,32 +1,44 @@
-import React, {useState} from 'react';
-import {Box} from 'ink';
-import {appendFileSync} from 'fs';
-import TextInput from './components/text-input.js';
+import React, {useEffect, useState} from 'react';
+import {getConfig} from './lib/filesystem.js';
+import {BlahConfig} from './lib/interface.js';
+import Home from './components/home.js';
+import SetConfig from './components/set-config.js';
+import Log from './components/log.js';
 
-// type Props = {
-// 	name: string | undefined;
-// };
-
-const LOG_FILE = '/tmp/daily-log.txt';
+enum Page {
+	PENDING = 0,
+	SET_CONFIG = 1,
+	ADD_LOG = 2,
+	SEARCH = 3,
+	HOME = 4,
+	EXPLORE = 5,
+}
 
 export default function App() {
-	const [log, setLog] = useState('');
+	const [page, setPage] = useState(Page.PENDING);
+	const [config, setConfig] = useState<BlahConfig | null>(null);
 
-	const handleSubmit = (value: string) => {
-		const timestamp = new Date().toISOString();
-		const entry = `[${timestamp}] ${value}\n`;
-		appendFileSync(LOG_FILE, entry, 'utf-8');
-		setLog('');
-	};
+	useEffect(() => {
+		const config = getConfig();
+		if (!config) {
+			setPage(Page.SET_CONFIG);
+		} else {
+			setConfig(config);
+			setPage(Page.HOME);
+		}
+	}, []);
 
-	return (
-		<Box padding={1} borderStyle={'round'}>
-			<TextInput
-				value={log}
-				onChange={setLog}
-				placeholder="What happened today?"
-				onSubmit={handleSubmit}
-			/>
-		</Box>
+	return page === Page.HOME ? (
+		<Home
+			onLog={async () => setPage(Page.ADD_LOG)}
+			onSearch={async () => setPage(Page.SEARCH)}
+			onExplore={async () => setPage(Page.EXPLORE)}
+		/>
+	) : page === Page.SET_CONFIG ? (
+		<SetConfig onComplete={async () => setPage(Page.HOME)} />
+	) : page === Page.ADD_LOG ? (
+		<Log config={config || undefined} goHome={async () => setPage(Page.HOME)} />
+	) : (
+		<></>
 	);
 }
