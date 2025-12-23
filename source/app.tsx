@@ -22,6 +22,7 @@ export default function App() {
 	const [materializedLogs, setMaterializedLogs] = useState<Update[] | null>(
 		null,
 	);
+	const [logsNeedUpdate, setLogsNeedUpdate] = useState(true);
 
 	const goHome = async () => {
 		setPage(Page.HOME);
@@ -70,11 +71,17 @@ export default function App() {
 			) : page === Page.SET_CONFIG ? (
 				<SetConfig onComplete={goHome} />
 			) : page === Page.ADD_LOG ? (
-				<Log config={config} goHome={goHome} />
+				<Log
+					config={config}
+					goHome={goHome}
+					submitCallback={async () => setLogsNeedUpdate(true)}
+				/>
 			) : page === Page.EXPLORE ? (
 				<Explore
 					materializeLogs={materializeLogs}
 					materializedLogs={materializedLogs}
+					logsNeedUpdate={logsNeedUpdate}
+					clearLogsNeedUpdate={async () => setLogsNeedUpdate(false)}
 					goHome={goHome}
 				/>
 			) : (

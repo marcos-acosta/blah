@@ -8,6 +8,8 @@ export type Props = {
 	materializeLogs: () => Promise<void>;
 	materializedLogs: Update[] | null;
 	goHome: () => void;
+	logsNeedUpdate: boolean;
+	clearLogsNeedUpdate: () => void;
 };
 
 export default function Explore(props: Props) {
@@ -49,11 +51,14 @@ export default function Explore(props: Props) {
 	);
 
 	useEffect(() => {
-		if (props.materializedLogs === null) {
+		if (props.logsNeedUpdate) {
 			props
 				.materializeLogs()
 				.catch(() => setError(true))
-				.finally(() => setIsLoading(false));
+				.finally(() => {
+					setIsLoading(false);
+					props.clearLogsNeedUpdate();
+				});
 		}
 	});
 
@@ -89,18 +94,23 @@ export default function Explore(props: Props) {
 					{updatesFromCurrentWeek.length === 0 ? (
 						<Text color="gray">No updates from this week!</Text>
 					) : (
-						updatesFromCurrentWeek.map(update => (
-							<Text
-								key={update.timestamp}
-								color={
-									update.timestamp === currentUpdate?.timestamp
-										? 'white'
-										: 'gray'
-								}
-							>
-								{formatDate(new Date(update.timestamp), true)}
-							</Text>
-						))
+						updatesFromCurrentWeek.map(update => {
+							const isSelected = update.timestamp === currentUpdate?.timestamp;
+							const color = isSelected ? 'white' : 'gray';
+
+							return (
+								<Box key={update.timestamp} flexDirection="row">
+									<Box width={35}>
+										<Text color={color}>
+											{formatDate(new Date(update.timestamp), true)}
+										</Text>
+									</Box>
+									<Box flexGrow={1}>
+										<Text color={color}>{update.message}</Text>
+									</Box>
+								</Box>
+							);
+						})
 					)}
 				</Box>
 			)}

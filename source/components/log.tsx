@@ -6,6 +6,7 @@ import TextInput from './text-input.js';
 export type Props = {
 	config?: BlahConfig;
 	goHome: () => void;
+	submitCallback: () => void;
 };
 
 export default function Log(props: Props) {
@@ -16,6 +17,7 @@ export default function Log(props: Props) {
 			return;
 		}
 		appendLog(props.config, value);
+		props.submitCallback();
 		props.goHome();
 	};
 
