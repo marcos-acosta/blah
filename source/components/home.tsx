@@ -1,7 +1,7 @@
 import React from 'react';
 import {Box, Text, useApp, useInput} from 'ink';
 import {getDayOfWeek} from '../lib/dates.js';
-import {withBreaks} from '../lib/input.js';
+import {withQuit} from '../lib/input.js';
 
 export type Props = {
 	onSearch: () => void;
@@ -13,14 +13,14 @@ export default function Home(props: Props) {
 	const {exit} = useApp();
 
 	useInput(
-		withBreaks(exit, exit, input => {
+		withQuit(exit, (input, key) => {
 			if (input === 'a') {
 				props.onLog();
 			} else if (input === 's') {
 				props.onSearch();
 			} else if (input === 'e') {
 				props.onExplore();
-			} else if (input === 'q') {
+			} else if (key.escape) {
 				exit();
 			}
 		}),

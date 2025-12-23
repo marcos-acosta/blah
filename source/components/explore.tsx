@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Box, Text, useApp, useInput} from 'ink';
 import {Update} from '../lib/interface.js';
 import {formatDate} from '../lib/dates.js';
-import {withBreaks} from '../lib/input.js';
+import {withQuit} from '../lib/input.js';
 
 export type Props = {
 	materializeLogs: () => Promise<void>;
@@ -18,6 +18,7 @@ export default function Explore(props: Props) {
 	const [currentIndex, setCurrentIndex] = useState<number | undefined>(
 		undefined,
 	);
+	const [showDetail, setShowDetail] = useState<boolean>(false);
 	const {exit} = useApp();
 
 	const nextIndex = () => {
@@ -41,11 +42,22 @@ export default function Explore(props: Props) {
 	};
 
 	useInput(
-		withBreaks(exit, props.goHome, (input, key) => {
+		withQuit(exit, (input, key) => {
 			if (key.upArrow || input === 'k') {
 				previousIndex();
 			} else if (key.downArrow || input === 'j') {
 				nextIndex();
+			}
+			if (!showDetail) {
+				if (key.escape || input === 'b') {
+					props.goHome();
+				} else if (key.return && currentIndex !== undefined) {
+					setShowDetail(true);
+				}
+			} else {
+				if (key.escape || input === 'b') {
+					setShowDetail(false);
+				}
 			}
 		}),
 	);
@@ -91,6 +103,19 @@ export default function Explore(props: Props) {
 				<Text color="gray" italic>
 					Loading...
 				</Text>
+			) : showDetail ? (
+				<Box flexDirection="column">
+					{currentUpdate ? (
+						<>
+							<Text color="gray">
+								{formatDate(new Date(currentUpdate?.timestamp), true)}
+							</Text>
+							<Text>{currentUpdate?.message}</Text>
+						</>
+					) : (
+						<Text color="red">Error loading current log.</Text>
+					)}
+				</Box>
 			) : (
 				<Box flexDirection="column">
 					{updatesFromCurrentWeek.length === 0 ? (
@@ -107,12 +132,7 @@ export default function Explore(props: Props) {
 											{formatDate(new Date(update.timestamp), true)}
 										</Text>
 									</Box>
-									<Box
-										// flexGrow={1}
-										height={1}
-										overflowX="hidden"
-										overflowY="hidden"
-									>
+									<Box height={1} overflowX="hidden" overflowY="hidden">
 										<Text color={color} wrap="truncate-end">
 											{update.message}
 										</Text>
