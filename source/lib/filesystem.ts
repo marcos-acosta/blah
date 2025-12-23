@@ -44,7 +44,7 @@ export const appendLog = (config: BlahConfig, message: string) => {
 		week: getWeek(now),
 		tags: [],
 	};
-	fs.appendFileSync(fullLogPath, JSON.stringify(update), 'utf-8');
+	fs.appendFileSync(fullLogPath, JSON.stringify(update) + '\n', 'utf-8');
 };
 
 export const loadAllLogs = async (config: BlahConfig) => {

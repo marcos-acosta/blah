@@ -88,7 +88,9 @@ export default function Explore(props: Props) {
 			{error ? (
 				<Text color="red">Error loading logs!</Text>
 			) : isLoading ? (
-				<Text color="gray">Loading...</Text>
+				<Text color="gray" italic>
+					Loading...
+				</Text>
 			) : (
 				<Box flexDirection="column">
 					{updatesFromCurrentWeek.length === 0 ? (
@@ -100,13 +102,20 @@ export default function Explore(props: Props) {
 
 							return (
 								<Box key={update.timestamp} flexDirection="row">
-									<Box width={35}>
+									<Box width={35} height={1} flexShrink={0}>
 										<Text color={color}>
 											{formatDate(new Date(update.timestamp), true)}
 										</Text>
 									</Box>
-									<Box flexGrow={1}>
-										<Text color={color}>{update.message}</Text>
+									<Box
+										// flexGrow={1}
+										height={1}
+										overflowX="hidden"
+										overflowY="hidden"
+									>
+										<Text color={color} wrap="truncate-end">
+											{update.message}
+										</Text>
 									</Box>
 								</Box>
 							);
