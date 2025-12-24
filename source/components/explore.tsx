@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Box, Text, Transform, useApp, useInput} from 'ink';
 import {Update} from '../lib/interface.js';
 import {formatDate} from '../lib/dates.js';
-import {withQuit} from '../lib/input.js';
+import TextInput from './text-input.js';
 
 export type Props = {
 	materializeLogs: () => Promise<void>;
@@ -10,11 +10,16 @@ export type Props = {
 	goHome: () => void;
 };
 
+const MAX_NUM_LOGS_TO_SHOW = 7;
+const LOGS_ON_EITHER_SIDE = Math.floor(MAX_NUM_LOGS_TO_SHOW / 2);
+
 export default function Explore(props: Props) {
 	const [currentIndex, setCurrentIndex] = useState<number | undefined>(
 		undefined,
 	);
 	const [showDetail, setShowDetail] = useState<boolean>(false);
+	const [searchMode, setSearchMode] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
 	const {exit} = useApp();
 
 	const nextIndex = () => {
@@ -94,9 +99,11 @@ export default function Explore(props: Props) {
 		}
 	};
 
-	useInput(
-		withQuit(exit, (input, key) => {
-			if (key.upArrow || input === 'k') {
+	useInput((input, key) => {
+		if (!searchMode) {
+			if (input === 'q') {
+				exit();
+			} else if (key.upArrow || input === 'k') {
 				previousIndex();
 			} else if (key.downArrow || input === 'j') {
 				nextIndex();
@@ -118,14 +125,20 @@ export default function Explore(props: Props) {
 					props.goHome();
 				} else if (key.return && currentIndex !== undefined) {
 					setShowDetail(true);
+				} else if (input === '/') {
+					setSearchMode(true);
 				}
 			} else {
 				if (key.escape || input === 'b') {
 					setShowDetail(false);
 				}
 			}
-		}),
-	);
+		} else {
+			if (key.escape) {
+				setSearchMode(false);
+			}
+		}
+	});
 
 	useEffect(() => {
 		if (props.materializedLogs && props.materializedLogs.length > 0) {
@@ -140,13 +153,36 @@ export default function Explore(props: Props) {
 			props.materializedLogs[currentIndex]) ||
 		undefined;
 
-	const updatesFromCurrentWeek =
-		(props.materializedLogs &&
-			currentUpdate &&
-			props.materializedLogs.filter(
-				update => update.week === currentUpdate.week,
-			)) ||
-		[];
+	let updatesToShow: Update[] = [];
+	if (props.materializedLogs && currentIndex !== undefined) {
+		const logsAfterCurrent = props.materializedLogs.length - currentIndex - 1;
+		if (
+			currentIndex < LOGS_ON_EITHER_SIDE &&
+			logsAfterCurrent < LOGS_ON_EITHER_SIDE
+		) {
+			// Not enough on either side, show all logs
+			updatesToShow = props.materializedLogs;
+		} else if (
+			currentIndex >= LOGS_ON_EITHER_SIDE &&
+			logsAfterCurrent >= LOGS_ON_EITHER_SIDE
+		) {
+			// Enough logs on both sides, grab even amount from both sides
+			updatesToShow = props.materializedLogs.slice(
+				currentIndex - LOGS_ON_EITHER_SIDE,
+				currentIndex + LOGS_ON_EITHER_SIDE + 1,
+			);
+		} else {
+			if (currentIndex < LOGS_ON_EITHER_SIDE) {
+				// Constrained by backside
+				updatesToShow = props.materializedLogs.slice(0, MAX_NUM_LOGS_TO_SHOW);
+			} else if (logsAfterCurrent < LOGS_ON_EITHER_SIDE) {
+				// Constrained by frontsize
+				updatesToShow = props.materializedLogs.slice(
+					props.materializedLogs.length - MAX_NUM_LOGS_TO_SHOW,
+				);
+			}
+		}
+	}
 
 	return (
 		<>
@@ -167,10 +203,10 @@ export default function Explore(props: Props) {
 				</Box>
 			) : (
 				<Box flexDirection="column">
-					{updatesFromCurrentWeek.length === 0 ? (
+					{updatesToShow.length === 0 ? (
 						<Text color="gray">No updates from this week!</Text>
 					) : (
-						updatesFromCurrentWeek.map(update => {
+						updatesToShow.map(update => {
 							const isSelected = update.timestamp === currentUpdate?.timestamp;
 							const color = isSelected ? 'white' : 'gray';
 
@@ -189,6 +225,12 @@ export default function Explore(props: Props) {
 								</Box>
 							);
 						})
+					)}
+					{searchMode && (
+						<Box flexDirection="row" marginTop={1}>
+							<Text color="gray">/</Text>
+							<TextInput value={searchQuery} onChange={setSearchQuery} focus />
+						</Box>
 					)}
 				</Box>
 			)}

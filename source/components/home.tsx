@@ -15,7 +15,7 @@ export default function Home(props: Props) {
 		withQuit(exit, (input, key) => {
 			if (input === 'a') {
 				props.onLog();
-			} else if (input === 'b') {
+			} else if (input === 'e') {
 				props.onExplore();
 			} else if (key.escape) {
 				exit();
@@ -33,7 +33,7 @@ export default function Home(props: Props) {
 					Press <Text color="white">a</Text> to log
 				</Text>
 				<Text color="gray">
-					Press <Text color="white">b</Text> to browse
+					Press <Text color="white">e</Text> to browse
 				</Text>
 				<Text color="gray">
 					Press <Text color="white">q</Text> to quit
