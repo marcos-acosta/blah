@@ -125,6 +125,9 @@ export default function Explore(props: Props) {
 					setShowDetail(true);
 				} else if (input === '/') {
 					setSearchMode(true);
+				} else if (input === 'c' && searchQuery) {
+					// Clear search when 'c' is pressed and there's an active search
+					setSearchQuery('');
 				}
 			} else {
 				if (key.escape || input === 'b') {
@@ -132,7 +135,13 @@ export default function Explore(props: Props) {
 				}
 			}
 		} else {
+			// In search mode (editing the query)
 			if (key.escape) {
+				// Escape: clear search and exit search mode
+				setSearchQuery('');
+				setSearchMode(false);
+			} else if (key.return) {
+				// Enter: keep search and exit search mode (allows navigation)
 				setSearchMode(false);
 			}
 		}
@@ -228,7 +237,7 @@ export default function Explore(props: Props) {
 				<Box flexDirection="column">
 					{updatesToShow.length === 0 ? (
 						<Text color="gray" italic>
-							No logs found
+							No logs found!
 						</Text>
 					) : (
 						updatesToShow.map(update => {
@@ -251,12 +260,16 @@ export default function Explore(props: Props) {
 							);
 						})
 					)}
-					{searchMode && (
+					{searchMode ? (
 						<Box flexDirection="row" marginTop={1}>
 							<Text color="gray">/</Text>
 							<TextInput value={searchQuery} onChange={setSearchQuery} focus />
 						</Box>
-					)}
+					) : searchQuery ? (
+						<Box flexDirection="row" marginTop={1}>
+							<Text color="gray">/{searchQuery}</Text>
+						</Box>
+					) : null}
 				</Box>
 			)}
 		</>
