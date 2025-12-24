@@ -6,6 +6,8 @@ import SetConfig from './components/set-config.js';
 import Log from './components/log.js';
 import {TitledBox} from '@mishieck/ink-titled-box';
 import Explore from './components/explore.js';
+import {getLocalDate} from './lib/dates.js';
+import {Text} from 'ink';
 
 enum Page {
 	PENDING = 0,
@@ -22,7 +24,6 @@ export default function App() {
 	const [materializedLogs, setMaterializedLogs] = useState<Update[] | null>(
 		null,
 	);
-	const [logsNeedUpdate, setLogsNeedUpdate] = useState(true);
 
 	const goHome = async () => {
 		setPage(Page.HOME);
@@ -36,22 +37,55 @@ export default function App() {
 		if (!config) {
 			return;
 		}
-		setMaterializedLogs(await loadAllLogs(config));
+		const logs = await loadAllLogs(config);
+		setMaterializedLogs(logs);
+	};
+
+	const directlyMaterializeLogs = async (config: BlahConfig) => {
+		const logs = await loadAllLogs(config);
+		setMaterializedLogs(logs);
+		return logs;
 	};
 
 	const goExplore = async () => {
 		setPage(Page.EXPLORE);
 	};
 
-	useEffect(() => {
-		const config = getConfig();
-		if (!config) {
-			setPage(Page.SET_CONFIG);
+	const goHomeOrLog = async () => {
+		const lastLog = (materializedLogs && materializedLogs.at(-1)) || undefined;
+		if (lastLog && lastLog.date !== getLocalDate()) {
+			setPage(Page.HOME);
 		} else {
-			setConfig(config);
-			goHome();
+			setPage(Page.ADD_LOG);
 		}
+	};
+
+	useEffect(() => {
+		const init = async () => {
+			const config = getConfig();
+			if (!config) {
+				setPage(Page.SET_CONFIG);
+			} else {
+				setConfig(config);
+				const logs = await directlyMaterializeLogs(config);
+
+				// Decide which page to show
+				const lastLog = logs && logs.at(-1);
+				if (lastLog && lastLog.date !== getLocalDate()) {
+					setPage(Page.ADD_LOG);
+				} else {
+					setPage(Page.HOME);
+				}
+			}
+		};
+		init();
 	}, []);
+
+	useEffect(() => {
+		if (materializedLogs && page === Page.PENDING) {
+			goHomeOrLog();
+		}
+	}, [materializeLogs, page]);
 
 	return (
 		<TitledBox
@@ -72,21 +106,17 @@ export default function App() {
 			) : page === Page.SET_CONFIG ? (
 				<SetConfig onComplete={goHome} />
 			) : page === Page.ADD_LOG ? (
-				<Log
-					config={config}
-					goHome={goHome}
-					submitCallback={async () => setLogsNeedUpdate(true)}
-				/>
+				<Log config={config} goHome={goHome} submitCallback={materializeLogs} />
 			) : page === Page.EXPLORE ? (
 				<Explore
 					materializeLogs={materializeLogs}
 					materializedLogs={materializedLogs}
-					logsNeedUpdate={logsNeedUpdate}
-					clearLogsNeedUpdate={async () => setLogsNeedUpdate(false)}
 					goHome={goHome}
 				/>
 			) : (
-				<></>
+				<Text color="gray" italic>
+					Loading...
+				</Text>
 			)}
 		</TitledBox>
 	);

@@ -8,13 +8,9 @@ export type Props = {
 	materializeLogs: () => Promise<void>;
 	materializedLogs: Update[] | null;
 	goHome: () => void;
-	logsNeedUpdate: boolean;
-	clearLogsNeedUpdate: () => void;
 };
 
 export default function Explore(props: Props) {
-	const [isLoading, setIsLoading] = useState(props.materializedLogs === null);
-	const [error, setError] = useState(false);
 	const [currentIndex, setCurrentIndex] = useState<number | undefined>(
 		undefined,
 	);
@@ -132,18 +128,6 @@ export default function Explore(props: Props) {
 	);
 
 	useEffect(() => {
-		if (props.logsNeedUpdate) {
-			props
-				.materializeLogs()
-				.catch(() => setError(true))
-				.finally(() => {
-					setIsLoading(false);
-					props.clearLogsNeedUpdate();
-				});
-		}
-	});
-
-	useEffect(() => {
 		if (props.materializedLogs && props.materializedLogs.length > 0) {
 			const lastIndex = props.materializedLogs.length - 1;
 			setCurrentIndex(lastIndex);
@@ -166,13 +150,7 @@ export default function Explore(props: Props) {
 
 	return (
 		<>
-			{error ? (
-				<Text color="red">Error loading logs!</Text>
-			) : isLoading ? (
-				<Text color="gray" italic>
-					Loading...
-				</Text>
-			) : showDetail ? (
+			{showDetail ? (
 				<Box flexDirection="column">
 					{currentUpdate ? (
 						<>
