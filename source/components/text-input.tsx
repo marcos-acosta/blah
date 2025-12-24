@@ -162,6 +162,8 @@ function TextInput({
 			let nextValue = originalValue;
 			let nextCursorWidth = 0;
 
+			// console.log(input, key);
+
 			if (key.leftArrow) {
 				if (showCursor) {
 					nextCursorOffset--;
@@ -174,7 +176,10 @@ function TextInput({
 				nextCursorOffset = getOffsetOfPreviousWord(originalValue, cursorOffset);
 			} else if (key.meta && input === 'f') {
 				nextCursorOffset = getOffsetOfNextWord(originalValue, cursorOffset);
-			} else if (key.ctrl && input === 'w') {
+			} else if (
+				(key.ctrl && input === 'w') ||
+				(key.meta && (key.backspace || key.delete))
+			) {
 				// Option-Delete: delete to beginning of current word
 				const previousWordOffset = getOffsetOfPreviousWord(
 					originalValue,
