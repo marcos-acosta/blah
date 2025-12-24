@@ -13,9 +13,8 @@ enum Page {
 	PENDING = 0,
 	SET_CONFIG = 1,
 	ADD_LOG = 2,
-	SEARCH = 3,
-	HOME = 4,
-	EXPLORE = 5,
+	HOME = 3,
+	EXPLORE = 4,
 }
 
 export default function App() {
@@ -51,15 +50,6 @@ export default function App() {
 		setPage(Page.EXPLORE);
 	};
 
-	const goHomeOrLog = async () => {
-		const lastLog = (materializedLogs && materializedLogs.at(-1)) || undefined;
-		if (lastLog && lastLog.date !== getLocalDate()) {
-			setPage(Page.HOME);
-		} else {
-			setPage(Page.ADD_LOG);
-		}
-	};
-
 	useEffect(() => {
 		const init = async () => {
 			const config = getConfig();
@@ -81,12 +71,6 @@ export default function App() {
 		init();
 	}, []);
 
-	useEffect(() => {
-		if (materializedLogs && page === Page.PENDING) {
-			goHomeOrLog();
-		}
-	}, [materializeLogs, page]);
-
 	return (
 		<TitledBox
 			padding={1}
@@ -98,11 +82,7 @@ export default function App() {
 			borderColor={'yellow'}
 		>
 			{page === Page.HOME ? (
-				<Home
-					onLog={goLog}
-					onSearch={async () => setPage(Page.SEARCH)}
-					onExplore={goExplore}
-				/>
+				<Home onLog={goLog} onExplore={goExplore} />
 			) : page === Page.SET_CONFIG ? (
 				<SetConfig onComplete={goHome} />
 			) : page === Page.ADD_LOG ? (

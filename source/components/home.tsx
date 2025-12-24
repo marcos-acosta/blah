@@ -4,7 +4,6 @@ import {getDayOfWeek} from '../lib/dates.js';
 import {withQuit} from '../lib/input.js';
 
 export type Props = {
-	onSearch: () => void;
 	onLog: () => void;
 	onExplore: () => void;
 };
@@ -16,9 +15,7 @@ export default function Home(props: Props) {
 		withQuit(exit, (input, key) => {
 			if (input === 'a') {
 				props.onLog();
-			} else if (input === 's') {
-				props.onSearch();
-			} else if (input === 'e') {
+			} else if (input === 'b') {
 				props.onExplore();
 			} else if (key.escape) {
 				exit();
@@ -36,10 +33,7 @@ export default function Home(props: Props) {
 					Press <Text color="white">a</Text> to log
 				</Text>
 				<Text color="gray">
-					Press <Text color="white">s</Text> to search
-				</Text>
-				<Text color="gray">
-					Press <Text color="white">e</Text> to explore
+					Press <Text color="white">b</Text> to browse
 				</Text>
 				<Text color="gray">
 					Press <Text color="white">q</Text> to quit
