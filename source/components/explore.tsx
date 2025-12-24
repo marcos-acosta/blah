@@ -20,13 +20,14 @@ export default function Explore(props: Props) {
 	const [showDetail, setShowDetail] = useState<boolean>(false);
 	const [searchMode, setSearchMode] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
+	const [filteredLogs, setFilteredLogs] = useState<Update[] | null>(null);
 	const {exit} = useApp();
 
 	const nextIndex = () => {
 		if (
 			currentIndex !== undefined &&
-			props.materializedLogs?.length &&
-			currentIndex !== props.materializedLogs.length - 1
+			filteredLogs?.length &&
+			currentIndex !== filteredLogs.length - 1
 		) {
 			setCurrentIndex(currentIndex + 1);
 		}
@@ -35,7 +36,7 @@ export default function Explore(props: Props) {
 	const previousIndex = () => {
 		if (
 			currentIndex !== undefined &&
-			props.materializedLogs?.length &&
+			filteredLogs?.length &&
 			currentIndex !== 0
 		) {
 			setCurrentIndex(currentIndex - 1);
@@ -44,7 +45,7 @@ export default function Explore(props: Props) {
 
 	// Find nearest log to a target date
 	const findNearestLog = (targetDate: Date) => {
-		if (!props.materializedLogs || !props.materializedLogs.length) {
+		if (!filteredLogs || !filteredLogs.length) {
 			return;
 		}
 
@@ -52,14 +53,11 @@ export default function Explore(props: Props) {
 		const MS_PER_DAY = 24 * 60 * 60 * 1000;
 		let nearestIndex = 0;
 		let minDiff = Math.abs(
-			new Date((props.materializedLogs[0] as Update).timestamp).getTime() -
-				targetTime,
+			new Date((filteredLogs[0] as Update).timestamp).getTime() - targetTime,
 		);
 
-		for (let i = 1; i < props.materializedLogs.length; i++) {
-			const logTime = new Date(
-				(props.materializedLogs[i] as Update).timestamp,
-			).getTime();
+		for (let i = 1; i < filteredLogs.length; i++) {
+			const logTime = new Date((filteredLogs[i] as Update).timestamp).getTime();
 			const diff = Math.abs(logTime - targetTime);
 			const diffInDays = Math.floor(diff / MS_PER_DAY);
 
@@ -84,11 +82,11 @@ export default function Explore(props: Props) {
 			return;
 		}
 
-		if (currentIndex === undefined || !props.materializedLogs) {
+		if (currentIndex === undefined || !filteredLogs) {
 			return;
 		}
 
-		const currentLog = props.materializedLogs[currentIndex];
+		const currentLog = filteredLogs[currentIndex];
 		if (currentLog) {
 			const currentDate = new Date(currentLog.timestamp);
 			const targetDate = new Date(
@@ -140,45 +138,70 @@ export default function Explore(props: Props) {
 		}
 	});
 
+	// Filter logs based on search query
 	useEffect(() => {
-		if (props.materializedLogs && props.materializedLogs.length > 0) {
-			const lastIndex = props.materializedLogs.length - 1;
+		if (!props.materializedLogs) {
+			setFilteredLogs(null);
+			return;
+		}
+
+		if (!searchQuery) {
+			setFilteredLogs(props.materializedLogs);
+			return;
+		}
+
+		try {
+			const regex = new RegExp(searchQuery, 'i');
+			const filtered = props.materializedLogs.filter(log =>
+				regex.test(log.message),
+			);
+			setFilteredLogs(filtered);
+		} catch (error) {
+			// Invalid regex, show all logs
+			setFilteredLogs([]);
+		}
+	}, [props.materializedLogs, searchQuery]);
+
+	// Set initial index when filtered logs change
+	useEffect(() => {
+		if (filteredLogs && filteredLogs.length > 0) {
+			const lastIndex = filteredLogs.length - 1;
 			setCurrentIndex(lastIndex);
 		}
-	}, [props.materializedLogs]);
+	}, [filteredLogs]);
 
 	const currentUpdate =
-		(props.materializedLogs &&
+		(filteredLogs &&
 			currentIndex !== undefined &&
-			props.materializedLogs[currentIndex]) ||
+			filteredLogs[currentIndex]) ||
 		undefined;
 
 	let updatesToShow: Update[] = [];
-	if (props.materializedLogs && currentIndex !== undefined) {
-		const logsAfterCurrent = props.materializedLogs.length - currentIndex - 1;
+	if (filteredLogs && currentIndex !== undefined) {
+		const logsAfterCurrent = filteredLogs.length - currentIndex - 1;
 		if (
 			currentIndex < LOGS_ON_EITHER_SIDE &&
 			logsAfterCurrent < LOGS_ON_EITHER_SIDE
 		) {
 			// Not enough on either side, show all logs
-			updatesToShow = props.materializedLogs;
+			updatesToShow = filteredLogs;
 		} else if (
 			currentIndex >= LOGS_ON_EITHER_SIDE &&
 			logsAfterCurrent >= LOGS_ON_EITHER_SIDE
 		) {
 			// Enough logs on both sides, grab even amount from both sides
-			updatesToShow = props.materializedLogs.slice(
+			updatesToShow = filteredLogs.slice(
 				currentIndex - LOGS_ON_EITHER_SIDE,
 				currentIndex + LOGS_ON_EITHER_SIDE + 1,
 			);
 		} else {
 			if (currentIndex < LOGS_ON_EITHER_SIDE) {
 				// Constrained by backside
-				updatesToShow = props.materializedLogs.slice(0, MAX_NUM_LOGS_TO_SHOW);
+				updatesToShow = filteredLogs.slice(0, MAX_NUM_LOGS_TO_SHOW);
 			} else if (logsAfterCurrent < LOGS_ON_EITHER_SIDE) {
 				// Constrained by frontsize
-				updatesToShow = props.materializedLogs.slice(
-					props.materializedLogs.length - MAX_NUM_LOGS_TO_SHOW,
+				updatesToShow = filteredLogs.slice(
+					Math.max(filteredLogs.length - MAX_NUM_LOGS_TO_SHOW, 0),
 				);
 			}
 		}
@@ -204,7 +227,9 @@ export default function Explore(props: Props) {
 			) : (
 				<Box flexDirection="column">
 					{updatesToShow.length === 0 ? (
-						<Text color="gray">No updates from this week!</Text>
+						<Text color="gray" italic>
+							No logs found
+						</Text>
 					) : (
 						updatesToShow.map(update => {
 							const isSelected = update.timestamp === currentUpdate?.timestamp;
