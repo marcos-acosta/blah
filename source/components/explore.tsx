@@ -216,6 +216,16 @@ export default function Explore(props: Props) {
 		}
 	}
 
+	// Calculate the width needed for the date column
+	const dateColumnWidth =
+		updatesToShow.length > 0
+			? Math.max(
+					...updatesToShow.map(
+						update => formatDate(new Date(update.timestamp), 'hour').length,
+					),
+			  )
+			: 0;
+
 	return (
 		<>
 			{showDetail ? (
@@ -246,7 +256,12 @@ export default function Explore(props: Props) {
 
 							return (
 								<Box key={update.timestamp} flexDirection="row">
-									<Box width={35} height={1} flexShrink={0}>
+									<Box
+										width={dateColumnWidth}
+										height={1}
+										flexShrink={0}
+										marginRight={2}
+									>
 										<Text color={color}>
 											{formatDate(new Date(update.timestamp), 'hour')}
 										</Text>
