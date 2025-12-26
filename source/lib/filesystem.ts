@@ -4,7 +4,7 @@ import {promises as fsPromises} from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import {BlahConfig, Update} from './interface.js';
-import {getLocalDate, getWeek} from './dates.js';
+import {getLocalDate} from './dates.js';
 
 const CONFIG_FILE = path.join(os.homedir(), '.blah.toml');
 const LOG_FILENAME = 'logs.ndjson';
@@ -41,8 +41,6 @@ export const appendLog = (config: BlahConfig, message: string) => {
 		message: message,
 		timestamp: now.toISOString(),
 		date: getLocalDate(),
-		week: getWeek(now),
-		tags: [],
 	};
 	fs.appendFileSync(fullLogPath, JSON.stringify(update) + '\n', 'utf-8');
 };
