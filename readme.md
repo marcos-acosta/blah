@@ -1,5 +1,7 @@
 # blah
 
+![A screenshot of the CLI, where there are six rows of dated journal entry previews](/media/cover.png)
+
 A CLI for journaling.
 
 ## Installation
