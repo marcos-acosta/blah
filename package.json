@@ -1,5 +1,5 @@
 {
-	"name": "marcos-acosta@blah",
+	"name": "@marcos-acosta/blah",
 	"version": "1.0.0",
 	"license": "MIT",
 	"bin": "dist/cli.js",

@@ -7,14 +7,14 @@ A CLI for journaling.
 Global install:
 
 ```sh
-npm install -g marcos-acosta@blah
+npm install -g @marcos-acosta/blah
 blah
 ```
 
 Or run with `npx`:
 
 ```sh
-npx marcos-acosta@blah
+npx @marcos-acosta/blah
 ```
 
 I personally find an alias useful, as I run it every day:
