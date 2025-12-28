@@ -33,7 +33,7 @@ export default function Home(props: Props) {
 					Press <Text color="white">a</Text> to log
 				</Text>
 				<Text color="gray">
-					Press <Text color="white">e</Text> to browse
+					Press <Text color="white">e</Text> to browse entries
 				</Text>
 				<Text color="gray">
 					Press <Text color="white">q</Text> to quit
