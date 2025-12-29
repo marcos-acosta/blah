@@ -1,0 +1,3 @@
+- Customizable message list
+- Customizable color theme
+- Error flow if given path is invalid

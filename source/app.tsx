@@ -84,7 +84,7 @@ export default function App() {
 			{page === Page.HOME ? (
 				<Home onLog={goLog} onExplore={goExplore} />
 			) : page === Page.SET_CONFIG ? (
-				<SetConfig onComplete={goHome} />
+				<SetConfig onComplete={goHome} setConfig={setConfig} />
 			) : page === Page.ADD_LOG ? (
 				<Log config={config} goHome={goHome} submitCallback={materializeLogs} />
 			) : page === Page.EXPLORE ? (

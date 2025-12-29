@@ -6,6 +6,7 @@ import {writeConfig} from '../lib/filesystem.js';
 
 export type Props = {
 	onComplete: () => {};
+	setConfig: (c: BlahConfig) => void;
 };
 
 export default function SetConfig(props: Props) {
@@ -13,7 +14,8 @@ export default function SetConfig(props: Props) {
 
 	const complete = () => {
 		const config: BlahConfig = {logPath: logPath};
-		writeConfig(config);
+		const cleanedConfig = writeConfig(config);
+		props.setConfig(cleanedConfig);
 		props.onComplete();
 	};
 

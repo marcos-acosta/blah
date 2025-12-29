@@ -25,29 +25,36 @@ export const getConfig = (): BlahConfig | undefined => {
 	}
 };
 
-export const writeConfig = (config: BlahConfig) => {
+const getLogFilepath = (config: BlahConfig) =>
+	path.join(config.logPath, LOG_FILENAME);
+
+export const writeConfig = (config: BlahConfig): BlahConfig => {
 	const expandedConfig = {
 		...config,
 		logPath: expandPath(config.logPath),
 	};
 	fs.writeFileSync(CONFIG_FILE, TOML.stringify(expandedConfig));
 	fs.mkdirSync(expandedConfig.logPath, {recursive: true});
+	return expandedConfig;
 };
 
 export const appendLog = (config: BlahConfig, message: string) => {
-	const fullLogPath = path.join(config.logPath, LOG_FILENAME);
 	const now = new Date();
 	const update: Update = {
 		message: message,
 		timestamp: now.toISOString(),
 		date: getLocalDate(),
 	};
-	fs.appendFileSync(fullLogPath, JSON.stringify(update) + '\n', 'utf-8');
+	fs.openSync(getLogFilepath(config), 'a');
+	fs.appendFileSync(
+		getLogFilepath(config),
+		JSON.stringify(update) + '\n',
+		'utf-8',
+	);
 };
 
 export const loadAllLogs = async (config: BlahConfig) => {
-	const fullLogPath = path.join(config.logPath, LOG_FILENAME);
-	const data = await fsPromises.readFile(fullLogPath, 'utf-8');
+	const data = await fsPromises.readFile(getLogFilepath(config), 'utf-8');
 	return data
 		.trim()
 		.split('\n')
